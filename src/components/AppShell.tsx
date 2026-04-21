@@ -3,7 +3,6 @@ import { PropsWithChildren, ReactNode, useMemo, useState } from "react";
 import {
   Modal,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { MainStackParamList } from "../navigation/types";
 import { colors } from "../theme/colors";
@@ -46,6 +46,7 @@ export default function AppShell({
   const { user, logout } = useAuth();
   const navigation = useNavigation<any>();
   const route = useRoute();
+  const insets = useSafeAreaInsets();
   const [menuVisible, setMenuVisible] = useState(false);
   const userRoleId = user?.role_id ?? null;
 
@@ -81,7 +82,7 @@ export default function AppShell({
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <View style={[styles.topBar, headerCenter ? styles.topBarTall : null]}>
         <TouchableOpacity onPress={() => setMenuVisible(true)} style={styles.menuBtn}>
           <MaterialCommunityIcons name="menu" size={24} color="#0F172A" />
@@ -102,12 +103,18 @@ export default function AppShell({
         </View>
       </View>
 
-      {scroll ? <ScrollView contentContainerStyle={styles.content}>{children}</ScrollView> : <View style={styles.content}>{children}</View>}
+      {scroll ? (
+        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: 14 + Math.max(insets.bottom, 8) }]}>
+          {children}
+        </ScrollView>
+      ) : (
+        <View style={[styles.content, { paddingBottom: 14 + Math.max(insets.bottom, 8) }]}>{children}</View>
+      )}
 
       <Modal visible={menuVisible} transparent animationType="slide" onRequestClose={() => setMenuVisible(false)}>
         <View style={styles.modalRoot}>
           <Pressable style={styles.overlay} onPress={() => setMenuVisible(false)} />
-          <View style={styles.sidebar}>
+          <View style={[styles.sidebar, { paddingTop: insets.top, paddingBottom: Math.max(insets.bottom, 8) }]}>
             <View style={styles.brandBox}>
               <Text style={styles.brandTitle}>HTR | HTT Innovations</Text>
               <Text style={styles.brandSub}>Hitech Radiators Pvt. Ltd.</Text>

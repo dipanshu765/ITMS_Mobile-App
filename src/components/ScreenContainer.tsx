@@ -1,5 +1,6 @@
 import { PropsWithChildren } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, ViewStyle } from "react-native";
+import { ScrollView, StyleSheet, ViewStyle } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../theme/colors";
 
 interface Props extends PropsWithChildren {
@@ -9,10 +10,19 @@ interface Props extends PropsWithChildren {
 }
 
 export default function ScreenContainer({ children, padded = true, scroll = true, style }: Props) {
+  const insets = useSafeAreaInsets();
   const content = (
-    <SafeAreaView style={[styles.safe, style]}>
+    <SafeAreaView style={[styles.safe, style]} edges={["top", "bottom"]}>
       {scroll ? (
-        <ScrollView contentContainerStyle={[styles.content, padded && styles.padded]}>{children}</ScrollView>
+        <ScrollView
+          contentContainerStyle={[
+            styles.content,
+            padded && styles.padded,
+            { paddingBottom: (padded ? 16 : 0) + Math.max(insets.bottom, 8) },
+          ]}
+        >
+          {children}
+        </ScrollView>
       ) : (
         children
       )}
